@@ -1,0 +1,29 @@
+ae_epoll.o: ae_epoll.c
+ae_evport.o: ae_evport.c
+ae_kqueue.o: ae_kqueue.c
+ae_select.o: ae_select.c
+anet.o: anet.c fmacros.h anet.h
+cli_common.o: cli_common.c cli_common.h ../deps/hiredis/hiredis.h \
+ ../deps/hiredis/read.h ../deps/hiredis/sds.h ../deps/hiredis/alloc.h \
+ ../deps/hiredis/sdscompat.h ../deps/hiredis/sds.h
+crc64.o: crc64.c crc64.h crcspeed.h
+crcspeed.o: crcspeed.c crcspeed.h
+endianconv.o: endianconv.c
+geohash.o: geohash.c geohash.h
+geohash_helper.o: geohash_helper.c fmacros.h geohash_helper.h geohash.h \
+ debugmacro.h
+localtime.o: localtime.c
+lzf_c.o: lzf_c.c lzfP.h
+lzf_d.o: lzf_d.c lzfP.h
+memtest.o: memtest.c config.h
+monotonic.o: monotonic.c monotonic.h fmacros.h
+mt19937-64.o: mt19937-64.c mt19937-64.h
+pqsort.o: pqsort.c
+rand.o: rand.c
+release.o: release.c release.h version.h crc64.h
+setcpuaffinity.o: setcpuaffinity.c config.h
+setproctitle.o: setproctitle.c
+sha1.o: sha1.c solarisfixes.h sha1.h config.h
+sha256.o: sha256.c sha256.h
+siphash.o: siphash.c
+util.o: util.c fmacros.h util.h sds.h sha256.h
