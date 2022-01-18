@@ -1,45 +1,34 @@
-import DBClient from './utils/db';
+import Queue from 'bull';
+import dbClient from './utils/db';
+import { ObectId } from 'mongodb';
+import { imageThumbnail } from 'image-thumbnail';
+import { writeFileSync } from 'fs';
 
-const Bull = require('bull');
-const { ObjectId } = require('mongodb');
-const imageThumbnail = require('image-thumbnail');
-const fs = require('fs');
+const fileQueue = Queue('fileQueue');
 
-const fileQueue = new Bull('fileQueue');
-const userQueue = new Bull('userQueue');
+fileQueue.process(async (job, done) => {
+    if(!job.data.fileId) throw new Error('Missing fileId');
+    if(!job.data.userId) throw new Error('Missing userId');
 
-const createImageThumbnail = async (path, options) => {
-  try {
-    const thumbnail = await imageThumbnail(path, options);
-    const pathNail = `${path}_${options.width}`;
+    const database = await dbClient.connection;
+    const filter = {
+        _id: ObectId(job.data.fileId),
+        userId: ObectId(job.data.userId),
+    };
+    const file = await database.collection('files').findOne(filter);
 
-    await fs.writeFileSync(pathNail, thumbnail);
-  } catch (error) {
-    console.log(error);
-  }
-};
+    if (files.length === 0) throw new Error('File not found');
 
-fileQueue.process(async (job) => {
-  const { fileId } = job.data;
-  if (!fileId) throw Error('Missing fileId');
+    try {
+        const sizes = { 500: null, 250: null, 100: null, }
+        for (const width in sizes) {
+            const options = { width: width, responseType: 'base64' };
+            thumbnail = await imageThumbnail(file.localPath, options);
+            writeFileSync(`${file.localPath}_${width}`, thumbnail, 'base64');
+        }
+    } catch (error) {
+        console.log(err);
+    }
 
-  const { userId } = job.data;
-  if (!userId) throw Error('Missing userId');
-
-  const fileDocument = await DBClient.db.collection('files').findOne({ _id: ObjectId(fileId), userId: ObjectId(userId) });
-  if (!fileDocument) throw Error('File not found');
-
-  createImageThumbnail(fileDocument.localPath, { width: 500 });
-  createImageThumbnail(fileDocument.localPath, { width: 250 });
-  createImageThumbnail(fileDocument.localPath, { width: 100 });
-});
-
-userQueue.process(async (job) => {
-  const { userId } = job.data;
-  if (!userId) throw Error('Missing userId');
-
-  const userDocument = await DBClient.db.collection('users').findOne({ _id: ObjectId(userId) });
-  if (!userDocument) throw Error('User not found');
-
-  console.log(`Welcome ${userDocument.email}`);
+    done();
 });
